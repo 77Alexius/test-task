@@ -9,24 +9,24 @@ use Psr\Log\LoggerInterface;
 
 class ProductController extends AbstractController
 {
-	#[Route('/api/products/{id<\d+>}', methods: ['GET'])]
+	#[Route('/api/products/{id<\d+>}', methods: ['GET'], name: 'api_products_get_one')]
     public function getProduct(int $id = null, LoggerInterface $logger): Response
     {
         $product = [
 			[
-				'id' => 5,
+				'id' => 1,
 				'name' => 'Waterfalls',
 				'url' => 'https://symfonycasts.s3.amazonaws.com/sample.mp3',
 			],
 			[
-				'id' => 8,
+				'id' => 2,
 				'name' => 'Hello',
-				'url' => 'https://symfonycasts.s3.amazonaws.com/sample2.mp3',
+				'url' => 'https://symfonycasts.s3.amazonaws.com/sample.mp3',
 			],
 			[
-				'id' => 5,
+				'id' => 3,
 				'name' => 'Hello',
-				'url' => 'https://symfonycasts.s3.amazonaws.com/sample2.mp3',
+				'url' => 'https://symfonycasts.s3.amazonaws.com/sample.mp3',
 			],
         ];	
 
@@ -35,6 +35,7 @@ class ProductController extends AbstractController
         $logger->info('Returning API response for products in category {id}', [
             'id' => $id,
         ]);
+		//$json = $product[0];
 		return $this->json($json);
     }
 	
