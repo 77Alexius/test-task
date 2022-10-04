@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class FileController extends AbstractController
 {
-	#[Route('/')]
+	#[Route('/', name: "app_homepage")]
     public function homepage(): Response
     {
         $tracks = [
@@ -20,21 +20,20 @@ class FileController extends AbstractController
             ['song' => 'Fantasy', 'artist' => 'Mariah Carey'],
         ];
 		
+		dump($tracks);
+		
         return $this->render('file/homepage.html.twig', [
             'title' => 'PB & Jams',
 			'tracks' => $tracks,
         ]);
     }
 	
-    #[Route('/browse/{slug}')]
+    #[Route('/browse/{slug}', name: "app_browse")]
     public function browse(string $slug = null): Response
     {
-        if ($slug) {
-            $title = 'Genre: '.u(str_replace('-', ' ', $slug))->title(true);
-        } else {
-            $title = 'All Genres';
-        }
-		return new Response($title);
-        //return new Response('Breakup vinyl? Angsty 90s rock? Browse the collection!');
-    }	
+        $genre = $slug ? u(str_replace('-', ' ', $slug))->title(true) : null;
+        return $this->render('file/browse.html.twig', [
+            'genre' => $genre
+        ]);
+    }
 }
