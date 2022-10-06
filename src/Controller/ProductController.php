@@ -1,42 +1,62 @@
 <?php
+
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Products;
+use App\Entity\Categories;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ProductController extends AbstractController
 {
-	#[Route('/api/products/{id<\d+>}', methods: ['GET'], name: 'api_products_get_one')]
-    public function getProduct(int $id = null, LoggerInterface $logger): Response
-    {
-        $product = [
-			[
-				'id' => 1,
-				'name' => 'Waterfalls',
-				'url' => 'https://symfonycasts.s3.amazonaws.com/sample.mp3',
-			],
-			[
-				'id' => 2,
-				'name' => 'Hello',
-				'url' => 'https://symfonycasts.s3.amazonaws.com/sample.mp3',
-			],
-			[
-				'id' => 3,
-				'name' => 'Hello',
-				'url' => 'https://symfonycasts.s3.amazonaws.com/sample.mp3',
-			],
-        ];	
+    #[Route('/product', name: 'create_product')]
+    public function createProduct(ManagerRegistry $doctrine): Response
+    {		
+		$id = 1;
+        $category = $doctrine->getRepository(Categories::class)->find($id);
+        if (!$category) {
+            throw $this->createNotFoundException('The category does not exist');
+        } 
+		
+        $product = new Products();
+		$product->setcID($category);
+        $product->setpName('Keyboard');
+        $product->setpPrice(1999);
+        $product->setpUTID('Ergonomic and stylish!');
+		$product->setpImageLink(null);
+		$product->setpFileUploadDate(null);
+		$product->setpFileSize(null);
+		$product->setpFileLink(null);
 
-		$product_filtered = array_filter($product, function($_array) use ($id){ return isset($_array['id']) && $_array['id'] == $id; });
-		$json = $id ? $product_filtered : $product;
-        $logger->info('Returning API response for products in category {id}', [
-            'id' => $id,
-        ]);
-		//$json = $product[0];
-		return $this->json($json);
+        $entityManager = $doctrine->getManager();
+		
+        // tell Doctrine you want to (eventually) save the Product (no queries yet)
+        $entityManager->persist($product);
+
+        // actually executes the queries (i.e. the INSERT query)
+        $entityManager->flush();
+
+        return new Response('Saved new product with id '.$product->getpId());
     }
 	
+	
+	#[Route('/category', name: 'create_category')]
+    public function createCategory(ManagerRegistry $doctrine): Response
+    {
+        $entityManager = $doctrine->getManager();
+
+        $category = new Categories();
+        $category->setcName('Keyboard');
+		
+        // tell Doctrine you want to (eventually) save the category (no queries yet)
+        $entityManager->persist($category);
+
+        // actually executes the queries (i.e. the INSERT query)
+        $entityManager->flush();
+
+        return new Response('Saved new category with id '.$category->getCid());
+    }
 }
+
